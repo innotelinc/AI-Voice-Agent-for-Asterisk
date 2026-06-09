@@ -1,4 +1,4 @@
-active_pipeline: null
+active_pipeline: local_hybrid
 asterisk:
   app_name: asterisk-ai-voice-agent
 audio_transport: audiosocket
@@ -1331,7 +1331,7 @@ contexts:
       - hangup_call
       - mcp_weather_get_city
 default_provider: local_hybrid
-downstream_mode: stream
+downstream_mode: file
 external_media:
   codec: ulaw
   direction: both
