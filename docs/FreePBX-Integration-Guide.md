@@ -408,12 +408,12 @@ exten => s,1,NoOp(AI Agent - After Hours)
 
 ### 3.6 Create Custom Destinations
 
-Create a FreePBX Custom Destination for each context you want to expose to IVRs or inbound routes.
+Create a FreePBX Custom Destination for each context you want to expose to IVRs, inbound routes, or internal feature codes.
 
 **Steps:**
 
-1. Navigate to: **Admin → Custom Destination**
-2. Click **"Add"** to create a new destination
+1. Navigate to: **Admin → Custom Destinations**
+2. Click **"Add Destination"**
 3. Set Target to your dialplan entry:
    - `from-ai-agent,s,1` (basic AI agent)
    - `from-ai-agent-support,s,1` (customer support context)
@@ -426,6 +426,35 @@ Create a FreePBX Custom Destination for each context you want to expose to IVRs 
 Snapshot:
 
 ![Custom Destination - Target](freepbx/img/snapshot-2-custom-destination.png)
+
+### 3.7 Optional: Create an Internal Test Code with Misc Applications
+
+If you want an internal extension/feature code for quickly calling the AI from a registered handset or softphone, create a **Misc Application** that points at the Custom Destination.
+
+**Validated pattern:**
+
+- Custom Destination target: `from-ai-agent,s,1`
+- Misc Application destination: `customdests,dest-<id>,1`
+- Example internal test code: `7000`
+
+**Steps:**
+
+1. Create the Custom Destination first (example target: `from-ai-agent,s,1`).
+2. Navigate to: **Applications → Misc Applications**.
+3. Click **"Add Misc Application"**.
+4. Set:
+   - **Description**: e.g. `AI Agent Test`
+   - **Feature Code**: e.g. `7000`
+   - **Destination**: select your AI Custom Destination
+5. Submit and **Apply Config**.
+
+This produces a generated dialplan flow equivalent to:
+
+```text
+7000 -> app-miscapps -> customdests,dest-<id>,1 -> from-ai-agent,s,1 -> Stasis(asterisk-ai-voice-agent)
+```
+
+This is a simple way to validate FreePBX-managed routing with a local softphone before wiring IVRs, inbound routes, queues, or time conditions.
 
 ## 4. Deployment & Startup
 
@@ -485,6 +514,18 @@ sudo chown -R asterisk:asterisk "${REPO_DIR}/asterisk_media/ai-generated"
 ```
 
 **Note**: Cloud configurations (OpenAI Realtime, Deepgram) use streaming and don't require this.
+
+### 4.4 Validated Host Notes for Ubuntu 24.04 + FreePBX 17 Manual Installs
+
+The following notes were validated on an Ubuntu 24.04 host running distro Asterisk 20 with a manual FreePBX 17 framework install:
+
+- **PHP compatibility:** FreePBX 17 was more reliable with **PHP 8.2** than the Ubuntu 24.04 default PHP 8.3 stack.
+- **Node availability:** if you install Node via `nvm`, the FreePBX installer and `fwconsole` tasks that run as root may still fail. Install **system `nodejs`/`npm`** so root can see them.
+- **Apache runtime user:** if FreePBX expects `AMPASTERISKWEBUSER=asterisk`, running Apache as `asterisk:asterisk` can avoid bootstrap/setup failures that occur when Apache stays on `www-data`.
+- **Asterisk CLI socket:** if `asterisk -rx` fails with `does /var/run/asterisk/asterisk.ctl exist?`, verify the socket exists and that `astctlpermissions`, `astctlowner`, and `astctlgroup` are set sensibly in `asterisk.conf` (commonly `0660`, `asterisk`, `asterisk`).
+- **FreePBX reload user:** `fwconsole reload` may need to run as `root` or the effective `asterisk` service user because it writes under `/var/lib/asterisk` and related FreePBX-managed paths.
+
+These are host bootstrap notes only; they do not change the AI routing model described above.
 
 ## 5. Verification & Testing
 
