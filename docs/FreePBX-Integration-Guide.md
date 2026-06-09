@@ -523,6 +523,7 @@ The following notes were validated on an Ubuntu 24.04 host running distro Asteri
 - **Node availability:** if you install Node via `nvm`, the FreePBX installer and `fwconsole` tasks that run as root may still fail. Install **system `nodejs`/`npm`** so root can see them.
 - **Apache runtime user:** if FreePBX expects `AMPASTERISKWEBUSER=asterisk`, running Apache as `asterisk:asterisk` can avoid bootstrap/setup failures that occur when Apache stays on `www-data`.
 - **Asterisk CLI socket:** if `asterisk -rx` fails with `does /var/run/asterisk/asterisk.ctl exist?`, verify the socket exists and that `astctlpermissions`, `astctlowner`, and `astctlgroup` are set sensibly in `asterisk.conf` (commonly `0660`, `asterisk`, `asterisk`).
+- **Operator group membership:** on hosts where the Asterisk control socket is owned by `asterisk:asterisk`, add your maintenance user (for example `claude`) to the `asterisk` group if you want non-root `asterisk -rx ...` access.
 - **FreePBX reload user:** `fwconsole reload` may need to run as `root` or the effective `asterisk` service user because it writes under `/var/lib/asterisk` and related FreePBX-managed paths.
 
 These are host bootstrap notes only; they do not change the AI routing model described above.
