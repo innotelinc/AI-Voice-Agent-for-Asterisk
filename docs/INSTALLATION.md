@@ -133,6 +133,15 @@ Generated audio is written to the host under:
 - `./asterisk_media/ai-generated` (host)
 - mounted into containers as `/mnt/asterisk_media/ai-generated`
 
+**Permission requirement (validated on host installs):** `./asterisk_media/ai-generated` must be writable by both the host Asterisk side and the `ai_engine` container user. The simplest stable setup is group ownership `asterisk:asterisk` with the setgid bit so new files inherit the shared group:
+
+```bash
+chgrp asterisk ./asterisk_media/ai-generated
+chmod 2775 ./asterisk_media/ai-generated
+```
+
+If this directory is only `0755`, live calls can reach Stasis but Local Hybrid TTS playback will fail with `Permission denied` when the engine tries to create `sound:ai-generated/...` assets.
+
 For **Asterisk file playback** (e.g., `sound:ai-generated/...`) the host Asterisk must be able to read those files under:
 
 - `/var/lib/asterisk/sounds/ai-generated`
