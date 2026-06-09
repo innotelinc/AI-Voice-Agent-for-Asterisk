@@ -6,6 +6,7 @@
 - **[Installation Guide](INSTALLATION.md)** - Complete setup instructions
 - **[Admin UI Guide](ADMIN_UI_GUIDE.md)** - Web interface for configuration and monitoring
 - **[FreePBX Integration Guide](FreePBX-Integration-Guide.md)** - Dialplan and queue configuration
+- **[FreePBX Ubuntu Host Validation](freepbx/FreePBX-Ubuntu-Host-Validation.md)** - Validated FreePBX-on-Ubuntu host notes, routing, and real-call proof sequence
 - **[Outbound Calling (Alpha)](OUTBOUND_CALLING.md)** - Scheduled outbound campaigns, voicemail drop, consent gate
 - **[Configuration Reference](Configuration-Reference.md)** - All settings explained
 - **[Tool Calling Guide](TOOL_CALLING_GUIDE.md)** - Using telephony and business tools
