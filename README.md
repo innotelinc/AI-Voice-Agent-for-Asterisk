@@ -6,11 +6,12 @@
   <img alt="Asterisk AI Voice Agent" src="assets/banner_light_mode.png?v=9" width="100%">
 </picture>
 
-![Version](https://img.shields.io/badge/version-6.5.4-blue.svg)
+![Version](https://img.shields.io/badge/version-6.5.5-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
 ![Docker](https://img.shields.io/badge/docker-compose-blue.svg)
 ![Asterisk](https://img.shields.io/badge/asterisk-18+-orange.svg)
+[![GitHub Release](https://img.shields.io/github/v/release/innotelinc/AI-Voice-Agent-for-Asterisk)](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/releases)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/hkjarral/Asterisk-AI-Voice-Agent)
 [![Discord](https://dcbadge.limes.pink/api/server/ysg8fphxUe?style=plastic)](https://discord.gg/ysg8fphxUe)
 <br>
@@ -18,7 +19,7 @@
 
 The most powerful, flexible open-source AI voice agent for Asterisk/FreePBX. Featuring a **modular pipeline architecture** that lets you mix and match STT, LLM, and TTS providers, plus **6 production-ready golden baselines** validated for enterprise deployment.
 
-[Quick Start](#-quick-start) • [Features](#-features) • [Roadmap](docs/ROADMAP.md) • [Demo](#-demo) • [Docs](docs/README.md) • [Community](#-community)
+[Quick Start](#-quick-start) • [Features](#-features) • [Roadmap](docs/ROADMAP.md) • [Demo](#-demo) • [Docs](docs/README.md) • [Releases](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/releases) • [Community](#-community)
 
 </div>
 
@@ -55,7 +56,7 @@ For a complete **first successful call** walkthrough (dialplan + transport selec
 
 ```bash
 # Clone repository
-git clone https://github.com/hkjarral/Asterisk-AI-Voice-Agent.git
+git clone https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk.git
 cd Asterisk-AI-Voice-Agent
 
 # Run preflight with auto-fix (creates .env, generates JWT_SECRET)
@@ -164,6 +165,18 @@ docker compose -p asterisk-ai-voice-agent logs -f ai_engine
 ## 🎉 What's New
 
 <details open>
+<summary><b>v6.5.5 (2026-06-09) — GitHub release + local-mode runbook for the innotelinc fork</b></summary>
+
+This fork-specific release makes the repository friendlier to install and consume directly from GitHub:
+
+- **README refresh for GitHub** — clone/install/community links now point at `innotelinc/AI-Voice-Agent-for-Asterisk` instead of the old upstream repository.
+- **GitHub Releases ready** — semver tag for this fork triggers the existing release workflows for CLI binaries and GHCR images.
+- **Local-mode defaults documented** — new host-local runbook at `docs/HOST_LOCAL_MODE_RUNBOOK.md` covers preflight, local-hybrid mode, model setup, Admin UI credential rotation, and Asterisk validation on a same-host deployment.
+- **Validated local host setup** — repo defaults were switched to the `local_hybrid` pipeline and verified against a live host Asterisk + local AI stack.
+
+</details>
+
+<details>
 <summary><b>v6.5.4 (2026-05-25) — OpenAI Realtime GA cleanup across every code path</b></summary>
 
 Follow-up to the v6.5.3 hotfix. v6.5.3 only flipped `config/ai-agent.yaml`; v6.5.4 brings the rest of the codebase in line:
@@ -547,7 +560,7 @@ Production-ready CLI for operations and setup.
 
 **Installation:**
 ```bash
-curl -sSL https://raw.githubusercontent.com/hkjarral/Asterisk-AI-Voice-Agent/main/scripts/install-cli.sh | bash
+curl -sSL https://raw.githubusercontent.com/innotelinc/AI-Voice-Agent-for-Asterisk/main/scripts/install-cli.sh | bash
 ```
 
 **Commands:**
@@ -676,7 +689,7 @@ The `preflight.sh` script handles initial setup:
 ### 🚀 Get Started in 3 Steps
 
 ```bash
-git clone -b develop https://github.com/hkjarral/Asterisk-AI-Voice-Agent.git
+git clone -b develop https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk.git
 cd Asterisk-AI-Voice-Agent
 ./scripts/setup-contributor.sh
 ```
@@ -687,20 +700,20 @@ Then open in [Windsurf](https://codeium.com/windsurf) and type: **"I want to con
 
 | Guide | For |
 |-------|-----|
-| **[Operator Contributor Guide](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/blob/develop/docs/contributing/OPERATOR_CONTRIBUTOR_GUIDE.md)** | First-time contributors (no GitHub experience needed) |
+| **[Operator Contributor Guide](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/blob/main/docs/contributing/OPERATOR_CONTRIBUTOR_GUIDE.md)** | First-time contributors (no GitHub experience needed) |
 | **[Contributing Guide](CONTRIBUTING.md)** | Full contribution guidelines and workflow |
-| **[Coding Guidelines](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/blob/develop/docs/contributing/CODING_GUIDELINES.md)** | Code standards for all contributions |
+| **[Coding Guidelines](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/blob/main/docs/contributing/CODING_GUIDELINES.md)** | Code standards for all contributions |
 | **[Roadmap](docs/ROADMAP.md)** | What to work on next (13+ beginner-friendly tasks) |
 
 ### 🔧 Build Something New
 
 | Area | Guide | Template |
 |------|-------|----------|
-| Full Agent Provider | [Guide](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/blob/develop/docs/contributing/adding-full-agent-provider.md) | [Template](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/blob/develop/examples/providers/template_full_agent.py) |
-| Pipeline Adapter (STT/LLM/TTS) | [Guide](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/blob/develop/docs/contributing/adding-pipeline-adapter.md) | [Templates](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/tree/develop/examples/pipelines/) |
-| Pre-Call Hook | [Guide](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/blob/develop/docs/contributing/pre-call-hooks-development.md) | [Template](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/blob/develop/examples/hooks/template_pre_call_hook.py) |
-| In-Call Hook | [Guide](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/blob/develop/docs/contributing/in-call-hooks-development.md) | [Template](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/blob/develop/examples/hooks/template_in_call_hook.py) |
-| Post-Call Hook | [Guide](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/blob/develop/docs/contributing/post-call-hooks-development.md) | [Template](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/blob/develop/examples/hooks/template_post_call_hook.py) |
+| Full Agent Provider | [Guide](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/blob/main/docs/contributing/adding-full-agent-provider.md) | [Template](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/blob/main/examples/providers/template_full_agent.py) |
+| Pipeline Adapter (STT/LLM/TTS) | [Guide](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/blob/main/docs/contributing/adding-pipeline-adapter.md) | [Templates](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/tree/main/examples/pipelines/) |
+| Pre-Call Hook | [Guide](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/blob/main/docs/contributing/pre-call-hooks-development.md) | [Template](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/blob/main/examples/hooks/template_pre_call_hook.py) |
+| In-Call Hook | [Guide](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/blob/main/docs/contributing/in-call-hooks-development.md) | [Template](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/blob/main/examples/hooks/template_in_call_hook.py) |
+| Post-Call Hook | [Guide](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/blob/main/docs/contributing/post-call-hooks-development.md) | [Template](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/blob/main/examples/hooks/template_post_call_hook.py) |
 
 ### 👩‍💻 For Developers
 - [Developer Onboarding](docs/DEVELOPER_ONBOARDING.md) - Project overview and first tasks
@@ -729,15 +742,15 @@ Then open in [Windsurf](https://codeium.com/windsurf) and type: **"I want to con
 </tr>
 </table>
 
-See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full list and [Recognition Program](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/blob/develop/docs/contributing/RECOGNITION.md) for how we recognize contributions.
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full list and [Recognition Program](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/blob/main/docs/contributing/RECOGNITION.md) for how we recognize contributions.
 
 ---
 
 ## 💬 Community
 
 - **[Discord Server](https://discord.gg/ysg8fphxUe)** - Support and discussions
-- [GitHub Issues](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/issues) - Bug reports
-- [GitHub Discussions](https://github.com/hkjarral/Asterisk-AI-Voice-Agent/discussions) - General chat
+- [GitHub Issues](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/issues) - Bug reports
+- [GitHub Discussions](https://github.com/innotelinc/AI-Voice-Agent-for-Asterisk/discussions) - General chat
 
 ---
 
@@ -772,4 +785,4 @@ If you find this project useful, please also give it a ⭐️!
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=hkjarral/Asterisk-AI-Voice-Agent&type=date&legend=top-left)](https://www.star-history.com/#hkjarral/Asterisk-AI-Voice-Agent&type=date&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=innotelinc/AI-Voice-Agent-for-Asterisk&type=date&legend=top-left)](https://www.star-history.com/#innotelinc/AI-Voice-Agent-for-Asterisk&type=date&legend=top-left)
