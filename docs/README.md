@@ -4,6 +4,7 @@
 
 - **[Quick Start Guide](../README.md)** - Get started in 10 minutes
 - **[Installation Guide](INSTALLATION.md)** - Complete setup instructions
+- **[Barebones Server Install](BAREBONES_SERVER_INSTALL.md)** - Minimal Debian/Ubuntu host bootstrap for Asterisk + local-core
 - **[Admin UI Guide](ADMIN_UI_GUIDE.md)** - Web interface for configuration and monitoring
 - **[FreePBX Integration Guide](FreePBX-Integration-Guide.md)** - Dialplan and queue configuration
 - **[FreePBX Ubuntu Host Validation](freepbx/FreePBX-Ubuntu-Host-Validation.md)** - Validated FreePBX-on-Ubuntu host notes, routing, and real-call proof sequence

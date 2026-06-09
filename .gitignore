@@ -307,7 +307,11 @@ data/*.sqlite
 data/*.db-journal
 data/*.db-wal
 data/*.db-shm
+data/asterisk_status.json
 !data/.gitkeep
+
+# Local host validation markers
+.preflight-ok
 
 # Custom (community) model entries — user-specific, persists across upgrades
 data/custom_models.json
