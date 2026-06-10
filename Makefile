@@ -6,6 +6,8 @@ SERVER_HOST := your-server.example.com
 PROJECT_PATH := /root/Asterisk-Agent-Develop
 SERVICE ?= ai_engine
 provider ?= local
+AI_ROUTE_TARGET ?= from-ai-agent,s,1
+AI_ROUTE_EXTENSION ?= 7000
 
 # ------------------------------------------------------------------------------
 # Localhost vs Remote operation
@@ -241,6 +243,23 @@ quick-regression:
 	  && echo "3. Watch for ExternalMedia bridge join, RTP frames, provider input, playback start/finish, and cleanup." \
 	  && echo "4. Re-run make test-health to ensure active_calls resets to 0." \
 	  && echo "5. Capture findings in docs/resilience.md (and/or archived/regressions/) or your issue tracker."
+
+## verify-freepbx-route: Verify the FreePBX AI route objects and compiled dialplan on this host
+verify-freepbx-route:
+	@echo "--> Verifying FreePBX AI route on this host..."
+	@echo "    target=$(AI_ROUTE_TARGET) extension=$(AI_ROUTE_EXTENSION)"
+	@CMD='./scripts/install-freepbx-ubuntu-host.sh --check --check-ai-route --ai-route-extension "$(AI_ROUTE_EXTENSION)" --ai-route-target "$(AI_ROUTE_TARGET)"'; \
+	if sh -lc "$$CMD"; then \
+		exit 0; \
+	fi; \
+	if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then \
+		echo "--> Retrying with sudo -n"; \
+		sudo -n sh -lc "$$CMD"; \
+	else \
+		echo "❌ Verification failed without privileges, and non-interactive sudo is unavailable."; \
+		echo "   Re-run as: sudo make verify-freepbx-route AI_ROUTE_EXTENSION=$(AI_ROUTE_EXTENSION) AI_ROUTE_TARGET=$(AI_ROUTE_TARGET)"; \
+		exit 1; \
+	fi
 
 ## provider-switch: Update default provider locally
 provider-switch:

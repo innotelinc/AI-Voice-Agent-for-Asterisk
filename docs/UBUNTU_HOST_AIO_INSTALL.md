@@ -82,12 +82,26 @@ sudo scripts/install-ubuntu-host-aava-freepbx-all-in-one.sh \
 
 ### Verify an existing FreePBX AI route
 
+Shortest operator command:
+
+```bash
+make verify-freepbx-route
+```
+
+Equivalent direct script form:
+
 ```bash
 sudo scripts/install-ubuntu-host-aava-freepbx-all-in-one.sh \
   --check \
   --check-ai-route \
   --ai-route-extension 7000 \
   --ai-route-target from-ai-agent,s,1
+```
+
+Override the route if needed:
+
+```bash
+make verify-freepbx-route AI_ROUTE_EXTENSION=7000 AI_ROUTE_TARGET=from-ai-agent,s,1
 ```
 
 This verifies both:

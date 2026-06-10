@@ -52,6 +52,7 @@ For a complete **first successful call** walkthrough (dialplan + transport selec
 - **[Installation Guide](docs/INSTALLATION.md)**
 - **[Transport Compatibility](docs/Transport-Mode-Compatibility.md)**
 - **[Ubuntu Host AIO Install](docs/UBUNTU_HOST_AIO_INSTALL.md)** for a single-command host Asterisk + AAVA + FreePBX bootstrap on Ubuntu
+- **`make verify-freepbx-route`** to prove the compiled FreePBX route still resolves into `Stasis(asterisk-ai-voice-agent)` on a host install
 
 ### 1. Run Pre-flight Check (Required)
 

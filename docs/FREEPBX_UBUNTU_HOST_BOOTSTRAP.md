@@ -103,7 +103,13 @@ sudo scripts/install-freepbx-ubuntu-host.sh \
 
 Under the hood this calls `scripts/provision-freepbx-ai-route.php`, which uses FreePBX's own bootstrap and installed modules instead of raw guessed SQL.
 
-To verify an existing route without changing state:
+To verify an existing route without changing state, the shortest operator command is:
+
+```bash
+make verify-freepbx-route
+```
+
+Equivalent direct script form:
 
 ```bash
 sudo scripts/install-freepbx-ubuntu-host.sh \
@@ -111,6 +117,12 @@ sudo scripts/install-freepbx-ubuntu-host.sh \
   --check-ai-route \
   --ai-route-extension 7000 \
   --ai-route-target from-ai-agent,s,1
+```
+
+Override the route if needed:
+
+```bash
+make verify-freepbx-route AI_ROUTE_EXTENSION=7000 AI_ROUTE_TARGET=from-ai-agent,s,1
 ```
 
 This prints:
