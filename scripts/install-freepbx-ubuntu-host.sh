@@ -18,6 +18,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 PRECHECK_ONLY=false
+PROVISION_AI_ROUTE=false
 OPERATOR_USER="${SUDO_USER:-${USER:-root}}"
 FREEPBX_VERSION="${FREEPBX_VERSION:-17.0}"
 FREEPBX_TARBALL_URL="${FREEPBX_TARBALL_URL:-https://mirror.freepbx.org/modules/packages/freepbx/freepbx-17.0-latest.tgz}"
@@ -28,6 +29,11 @@ ASTERISK_USER="${ASTERISK_USER:-asterisk}"
 ASTERISK_GROUP="${ASTERISK_GROUP:-asterisk}"
 ASTERISK_WEB_USER="${ASTERISK_WEB_USER:-asterisk}"
 ASTERISK_WEB_GROUP="${ASTERISK_WEB_GROUP:-asterisk}"
+AI_ROUTE_TARGET="${AI_ROUTE_TARGET:-from-ai-agent,s,1}"
+AI_ROUTE_EXTENSION="${AI_ROUTE_EXTENSION:-7000}"
+AI_ROUTE_DESCRIPTION="${AI_ROUTE_DESCRIPTION:-AI Agent Entry}"
+AI_CUSTOM_DEST_DESCRIPTION="${AI_CUSTOM_DEST_DESCRIPTION:-AI Agent Entry}"
+AI_ROUTE_NOTES="${AI_ROUTE_NOTES:-Provisioned by Asterisk AI Voice Agent installer}"
 REQUIRED_MODULES=(framework core sipsettings voicemail dashboard calendar contactmanager certman pm2 userman customappsreg miscapps filestore backup)
 
 RED='\033[0;31m'
@@ -48,12 +54,18 @@ Usage: scripts/install-freepbx-ubuntu-host.sh [options]
 Bootstrap FreePBX 17 on an Ubuntu host that already runs Asterisk locally.
 
 Options:
-  --check                 Verify current host FreePBX/Asterisk state only
-  --operator-user USER    Add this user to the asterisk group
-  --db-root-pass PASS     MariaDB root password (omit for unix_socket root auth)
-  --freepbx-url URL       Override framework tarball URL
-  --php-minor VER         PHP minor to target (default: 8.2)
-  -h, --help              Show this help
+  --check                         Verify current host FreePBX/Asterisk state only
+  --provision-ai-route            Create/update a FreePBX Custom Destination + Misc Application
+  --ai-route-target TARGET        Dialplan target for the route (default: from-ai-agent,s,1)
+  --ai-route-extension EXT        Misc Application extension/feature code (default: 7000)
+  --ai-route-description TEXT     Misc Application description (default: AI Agent Entry)
+  --ai-custom-dest-description T  Custom Destination description (default: AI Agent Entry)
+  --ai-route-notes TEXT           Notes stored on the Custom Destination
+  --operator-user USER            Add this user to the asterisk group
+  --db-root-pass PASS             MariaDB root password (omit for unix_socket root auth)
+  --freepbx-url URL               Override framework tarball URL
+  --php-minor VER                 PHP minor to target (default: 8.2)
+  -h, --help                      Show this help
 
 Examples:
   sudo scripts/install-freepbx-ubuntu-host.sh
@@ -67,6 +79,30 @@ while [[ $# -gt 0 ]]; do
     --check)
       PRECHECK_ONLY=true
       shift
+      ;;
+    --provision-ai-route)
+      PROVISION_AI_ROUTE=true
+      shift
+      ;;
+    --ai-route-target)
+      AI_ROUTE_TARGET="$2"
+      shift 2
+      ;;
+    --ai-route-extension)
+      AI_ROUTE_EXTENSION="$2"
+      shift 2
+      ;;
+    --ai-route-description)
+      AI_ROUTE_DESCRIPTION="$2"
+      shift 2
+      ;;
+    --ai-custom-dest-description)
+      AI_CUSTOM_DEST_DESCRIPTION="$2"
+      shift 2
+      ;;
+    --ai-route-notes)
+      AI_ROUTE_NOTES="$2"
+      shift 2
       ;;
     --operator-user)
       OPERATOR_USER="$2"
@@ -305,6 +341,19 @@ restart_services() {
   $SUDO systemctl restart apache2
 }
 
+provision_ai_route() {
+  info "Provisioning FreePBX Custom Destination + Misc Application for ${AI_ROUTE_TARGET}"
+  local helper="$REPO_DIR/scripts/provision-freepbx-ai-route.php"
+  [[ -f "$helper" ]] || die "Missing helper: $helper"
+  php "$helper" \
+    --target "$AI_ROUTE_TARGET" \
+    --route-extension "$AI_ROUTE_EXTENSION" \
+    --route-description "$AI_ROUTE_DESCRIPTION" \
+    --custom-dest-description "$AI_CUSTOM_DEST_DESCRIPTION" \
+    --notes "$AI_ROUTE_NOTES"
+  fwconsole reload
+}
+
 check_state() {
   echo "OS"
   . /etc/os-release
@@ -363,6 +412,9 @@ main() {
   configure_socket_permissions
   restart_services
   install_validated_modules
+  if $PROVISION_AI_ROUTE; then
+    provision_ai_route
+  fi
   restart_services
   check_state
 
@@ -370,7 +422,11 @@ main() {
   success "FreePBX Ubuntu host bootstrap complete"
   info "Next steps:"
   info "  1. Open http://HOST/admin and complete the first-run admin account wizard if prompted"
-  info "  2. Create a Custom Destination to from-ai-agent,s,1 and expose it via Misc Applications"
+  if $PROVISION_AI_ROUTE; then
+    info "  2. FreePBX AI route was provisioned at extension ${AI_ROUTE_EXTENSION} -> ${AI_ROUTE_TARGET}"
+  else
+    info "  2. Create a Custom Destination to from-ai-agent,s,1 and expose it via Misc Applications"
+  fi
   info "  3. Log out/in once if '$OPERATOR_USER' was newly added to the asterisk group"
 }
 

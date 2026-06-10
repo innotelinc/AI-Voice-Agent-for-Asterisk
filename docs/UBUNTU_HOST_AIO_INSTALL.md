@@ -60,6 +60,26 @@ sudo scripts/install-ubuntu-host-aava-freepbx-all-in-one.sh --operator-user "$US
 sudo scripts/install-ubuntu-host-aava-freepbx-all-in-one.sh --check
 ```
 
+### Provision the FreePBX AI route too
+
+```bash
+sudo scripts/install-ubuntu-host-aava-freepbx-all-in-one.sh \
+  --operator-user "$USER" \
+  --provision-ai-route
+```
+
+Optional route overrides:
+
+```bash
+sudo scripts/install-ubuntu-host-aava-freepbx-all-in-one.sh \
+  --operator-user "$USER" \
+  --provision-ai-route \
+  --ai-route-target from-ai-agent,s,1 \
+  --ai-route-extension 7000 \
+  --ai-route-description "AI Agent Test" \
+  --ai-custom-dest-description "AI Agent Entry"
+```
+
 ### Skip model download
 
 ```bash
@@ -97,14 +117,25 @@ This wrapper **does not** attempt to version-control or commit host-local runtim
 - MariaDB runtime state
 - FreePBX GUI objects stored on the host
 
-It also does **not** automate these GUI-driven/operator-specific items:
+It also does **not** automate these GUI-driven/operator-specific items by default:
 
 1. the first FreePBX web-admin account creation wizard
-2. the FreePBX **Custom Destination** object pointing to `from-ai-agent,s,1`
-3. the FreePBX **Misc Application** (or alternate route) that targets that destination
-4. softphone registration and user-specific endpoint credentials
+2. softphone registration and user-specific endpoint credentials
 
-Those remain intentionally separate because they are PBX-operator choices, not safe universal repo defaults.
+The PBX-facing AI route can now be provisioned noninteractively when you opt in with:
+
+```bash
+sudo scripts/install-ubuntu-host-aava-freepbx-all-in-one.sh \
+  --operator-user "$USER" \
+  --provision-ai-route
+```
+
+That mode uses FreePBX's own PHP bootstrap plus the `customappsreg` and `miscapps` modules to create or update:
+
+- a **Custom Destination** pointing to `from-ai-agent,s,1`
+- a **Misc Application** pointing to that Custom Destination
+
+It remains optional because extension numbers, route descriptions, and PBX object naming are operator choices.
 
 ## After the wrapper finishes
 

@@ -16,12 +16,18 @@ SKIP_AAVA=false
 SKIP_FREEPBX=false
 SKIP_MODELS=false
 SKIP_STACK=false
+PROVISION_AI_ROUTE=false
 OPERATOR_USER="${SUDO_USER:-${USER:-root}}"
 ARI_USER="${ASTERISK_ARI_USERNAME:-aava}"
 ARI_PASSWORD="${ASTERISK_ARI_PASSWORD:-AAVAchangeMeNow123!}"
 DB_ROOT_PASS="${DB_ROOT_PASS:-}"
 PHP_MINOR="${PHP_MINOR:-8.2}"
 FREEPBX_URL="${FREEPBX_TARBALL_URL:-https://mirror.freepbx.org/modules/packages/freepbx/freepbx-17.0-latest.tgz}"
+AI_ROUTE_TARGET="${AI_ROUTE_TARGET:-from-ai-agent,s,1}"
+AI_ROUTE_EXTENSION="${AI_ROUTE_EXTENSION:-7000}"
+AI_ROUTE_DESCRIPTION="${AI_ROUTE_DESCRIPTION:-AI Agent Entry}"
+AI_CUSTOM_DEST_DESCRIPTION="${AI_CUSTOM_DEST_DESCRIPTION:-AI Agent Entry}"
+AI_ROUTE_NOTES="${AI_ROUTE_NOTES:-Provisioned by Asterisk AI Voice Agent installer}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -51,6 +57,12 @@ Options:
   --db-root-pass PASS     MariaDB root password for FreePBX bootstrap
   --php-minor VER         PHP minor version for FreePBX bootstrap (default: 8.2)
   --freepbx-url URL       Override FreePBX framework tarball URL
+  --provision-ai-route    Create/update the FreePBX Custom Destination + Misc Application
+  --ai-route-target TGT   Dialplan target for the FreePBX route (default: from-ai-agent,s,1)
+  --ai-route-extension E  Misc Application extension/feature code (default: 7000)
+  --ai-route-description  Misc Application description (default: AI Agent Entry)
+  --ai-custom-dest-description TEXT  Custom Destination description (default: AI Agent Entry)
+  --ai-route-notes TEXT   Notes stored on the Custom Destination
   --skip-models           Skip `make model-setup` during AAVA bootstrap
   --skip-stack            Skip `docker compose up` during AAVA bootstrap
   --skip-aava             Run only the FreePBX half
@@ -92,6 +104,30 @@ while [[ $# -gt 0 ]]; do
       ;;
     --freepbx-url)
       FREEPBX_URL="$2"
+      shift 2
+      ;;
+    --provision-ai-route)
+      PROVISION_AI_ROUTE=true
+      shift
+      ;;
+    --ai-route-target)
+      AI_ROUTE_TARGET="$2"
+      shift 2
+      ;;
+    --ai-route-extension)
+      AI_ROUTE_EXTENSION="$2"
+      shift 2
+      ;;
+    --ai-route-description)
+      AI_ROUTE_DESCRIPTION="$2"
+      shift 2
+      ;;
+    --ai-custom-dest-description)
+      AI_CUSTOM_DEST_DESCRIPTION="$2"
+      shift 2
+      ;;
+    --ai-route-notes)
+      AI_ROUTE_NOTES="$2"
       shift 2
       ;;
     --skip-models)
@@ -146,12 +182,22 @@ run_aava() {
 run_freepbx() {
   local -a args=(--operator-user "$OPERATOR_USER" --php-minor "$PHP_MINOR" --freepbx-url "$FREEPBX_URL")
   [[ -n "$DB_ROOT_PASS" ]] && args+=(--db-root-pass "$DB_ROOT_PASS")
+  if $PROVISION_AI_ROUTE; then
+    args+=(
+      --provision-ai-route
+      --ai-route-target "$AI_ROUTE_TARGET"
+      --ai-route-extension "$AI_ROUTE_EXTENSION"
+      --ai-route-description "$AI_ROUTE_DESCRIPTION"
+      --ai-custom-dest-description "$AI_CUSTOM_DEST_DESCRIPTION"
+      --ai-route-notes "$AI_ROUTE_NOTES"
+    )
+  fi
   $PRECHECK_ONLY && args=(--check)
   run_checked "Running Ubuntu FreePBX bootstrap" "$REPO_DIR/scripts/install-freepbx-ubuntu-host.sh" "${args[@]}"
 }
 
 print_next_steps() {
-  cat <<'EOF'
+  cat <<EOF
 
 Next steps after the installer finishes:
 
@@ -159,10 +205,30 @@ Next steps after the installer finishes:
    http://YOUR-HOST/admin
 
 2. If the FreePBX first-run admin wizard appears, complete it.
+EOF
+
+  if $PROVISION_AI_ROUTE; then
+    cat <<EOF
+
+3. The FreePBX AI route was provisioned automatically:
+   - Misc Application extension: ${AI_ROUTE_EXTENSION}
+   - Dialplan target: ${AI_ROUTE_TARGET}
+EOF
+  else
+    cat <<'EOF'
 
 3. In FreePBX, create the PBX-facing AI route:
    - Custom Destination -> from-ai-agent,s,1
    - Misc Application (or another GUI-managed route) -> that Custom Destination
+
+   Or have the installer do it for you next time:
+   sudo scripts/install-ubuntu-host-aava-freepbx-all-in-one.sh \
+     --operator-user "$USER" \
+     --provision-ai-route
+EOF
+  fi
+
+  cat <<'EOF'
 
 4. Verify the compiled route from the Asterisk CLI:
    asterisk -rx 'dialplan show from-ai-agent'

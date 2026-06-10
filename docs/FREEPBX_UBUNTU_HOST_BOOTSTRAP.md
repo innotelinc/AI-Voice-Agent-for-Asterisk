@@ -53,8 +53,8 @@ Important caveats:
 - it is validated for **Ubuntu** only
 - it assumes **Asterisk is already installed on the host**
 - it does **not** automate the first web-admin user creation wizard inside `/admin`
-- it does **not** create your `from-ai-agent` FreePBX Custom Destination for you
 - it does **not** replace the repo’s broader host-Asterisk/AAVA bootstrap flow
+- by default it leaves FreePBX route objects for the operator to create, but you can opt into automatic route provisioning with `--provision-ai-route`
 
 Use this installer when your goal is specifically: **"Get FreePBX onto this Ubuntu Asterisk host in the working manual-install shape."**
 
@@ -71,6 +71,37 @@ sudo scripts/install-freepbx-ubuntu-host.sh --operator-user "$USER"
 ```bash
 sudo scripts/install-freepbx-ubuntu-host.sh --check
 ```
+
+## Optional noninteractive FreePBX AI route provisioning
+
+If you want the installer to also create/update the PBX-facing route into the AI context, use:
+
+```bash
+sudo scripts/install-freepbx-ubuntu-host.sh \
+  --operator-user "$USER" \
+  --provision-ai-route
+```
+
+Defaults:
+
+- target: `from-ai-agent,s,1`
+- Misc Application extension: `7000`
+- Misc Application description: `AI Agent Entry`
+- Custom Destination description: `AI Agent Entry`
+
+Override them if desired:
+
+```bash
+sudo scripts/install-freepbx-ubuntu-host.sh \
+  --operator-user "$USER" \
+  --provision-ai-route \
+  --ai-route-target from-ai-agent,s,1 \
+  --ai-route-extension 7000 \
+  --ai-route-description "AI Agent Test" \
+  --ai-custom-dest-description "AI Agent Entry"
+```
+
+Under the hood this calls `scripts/provision-freepbx-ai-route.php`, which uses FreePBX's own bootstrap and installed modules instead of raw guessed SQL.
 
 This prints:
 
@@ -124,7 +155,7 @@ sudo scripts/install-freepbx-ubuntu-host.sh \
    http://YOUR-HOST/admin
    ```
 2. Complete the first-run FreePBX admin account setup if prompted
-3. In FreePBX create:
+3. Either let the installer provision the route with `--provision-ai-route`, or in FreePBX create:
    - **Custom Destination** → `from-ai-agent,s,1`
    - **Misc Application** (or other route) → that Custom Destination
 4. Verify compiled routing from the Asterisk CLI:
