@@ -51,6 +51,7 @@ Get the **Admin UI running in 2 minutes**.
 For a complete **first successful call** walkthrough (dialplan + transport selection + verification), see:
 - **[Installation Guide](docs/INSTALLATION.md)**
 - **[Transport Compatibility](docs/Transport-Mode-Compatibility.md)**
+- **[Ubuntu Host AIO Install](docs/UBUNTU_HOST_AIO_INSTALL.md)** for a single-command host Asterisk + AAVA + FreePBX bootstrap on Ubuntu
 
 ### 1. Run Pre-flight Check (Required)
 

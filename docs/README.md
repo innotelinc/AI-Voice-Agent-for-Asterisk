@@ -5,6 +5,7 @@
 - **[Quick Start Guide](../README.md)** - Get started in 10 minutes
 - **[Installation Guide](INSTALLATION.md)** - Complete setup instructions
 - **[Barebones Server Install](BAREBONES_SERVER_INSTALL.md)** - Minimal Debian/Ubuntu host bootstrap for Asterisk + local-core
+- **[Ubuntu Host AIO Install](UBUNTU_HOST_AIO_INSTALL.md)** - Single-command Ubuntu host bootstrap for host Asterisk + local-core + FreePBX
 - **[FreePBX Ubuntu Host Bootstrap](FREEPBX_UBUNTU_HOST_BOOTSTRAP.md)** - Manual FreePBX 17 bootstrap for Ubuntu host Asterisk installs
 - **[Admin UI Guide](ADMIN_UI_GUIDE.md)** - Web interface for configuration and monitoring
 - **[FreePBX Integration Guide](FreePBX-Integration-Guide.md)** - Dialplan and queue configuration
