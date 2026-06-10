@@ -80,6 +80,22 @@ sudo scripts/install-ubuntu-host-aava-freepbx-all-in-one.sh \
   --ai-custom-dest-description "AI Agent Entry"
 ```
 
+### Verify an existing FreePBX AI route
+
+```bash
+sudo scripts/install-ubuntu-host-aava-freepbx-all-in-one.sh \
+  --check \
+  --check-ai-route \
+  --ai-route-extension 7000 \
+  --ai-route-target from-ai-agent,s,1
+```
+
+This verifies both:
+
+- the FreePBX objects exist as expected
+- the compiled Asterisk dialplan still resolves through `app-miscapps` into `from-ai-agent,s,1`
+- the AI entry target still contains `Stasis(asterisk-ai-voice-agent)`
+
 ### Skip model download
 
 ```bash

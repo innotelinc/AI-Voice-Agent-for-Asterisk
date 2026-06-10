@@ -17,6 +17,7 @@ SKIP_FREEPBX=false
 SKIP_MODELS=false
 SKIP_STACK=false
 PROVISION_AI_ROUTE=false
+CHECK_AI_ROUTE=false
 OPERATOR_USER="${SUDO_USER:-${USER:-root}}"
 ARI_USER="${ASTERISK_ARI_USERNAME:-aava}"
 ARI_PASSWORD="${ASTERISK_ARI_PASSWORD:-AAVAchangeMeNow123!}"
@@ -57,6 +58,7 @@ Options:
   --db-root-pass PASS     MariaDB root password for FreePBX bootstrap
   --php-minor VER         PHP minor version for FreePBX bootstrap (default: 8.2)
   --freepbx-url URL       Override FreePBX framework tarball URL
+  --check-ai-route        Verify the FreePBX AI route objects plus compiled dialplan readback
   --provision-ai-route    Create/update the FreePBX Custom Destination + Misc Application
   --ai-route-target TGT   Dialplan target for the FreePBX route (default: from-ai-agent,s,1)
   --ai-route-extension E  Misc Application extension/feature code (default: 7000)
@@ -105,6 +107,10 @@ while [[ $# -gt 0 ]]; do
     --freepbx-url)
       FREEPBX_URL="$2"
       shift 2
+      ;;
+    --check-ai-route)
+      CHECK_AI_ROUTE=true
+      shift
       ;;
     --provision-ai-route)
       PROVISION_AI_ROUTE=true
@@ -182,6 +188,10 @@ run_aava() {
 run_freepbx() {
   local -a args=(--operator-user "$OPERATOR_USER" --php-minor "$PHP_MINOR" --freepbx-url "$FREEPBX_URL")
   [[ -n "$DB_ROOT_PASS" ]] && args+=(--db-root-pass "$DB_ROOT_PASS")
+  $PRECHECK_ONLY && args+=(--check)
+  if $CHECK_AI_ROUTE; then
+    args+=(--check-ai-route)
+  fi
   if $PROVISION_AI_ROUTE; then
     args+=(
       --provision-ai-route
@@ -192,7 +202,6 @@ run_freepbx() {
       --ai-route-notes "$AI_ROUTE_NOTES"
     )
   fi
-  $PRECHECK_ONLY && args=(--check)
   run_checked "Running Ubuntu FreePBX bootstrap" "$REPO_DIR/scripts/install-freepbx-ubuntu-host.sh" "${args[@]}"
 }
 
@@ -211,6 +220,13 @@ EOF
     cat <<EOF
 
 3. The FreePBX AI route was provisioned automatically:
+   - Misc Application extension: ${AI_ROUTE_EXTENSION}
+   - Dialplan target: ${AI_ROUTE_TARGET}
+EOF
+  elif $CHECK_AI_ROUTE; then
+    cat <<EOF
+
+3. The existing FreePBX AI route was verified automatically:
    - Misc Application extension: ${AI_ROUTE_EXTENSION}
    - Dialplan target: ${AI_ROUTE_TARGET}
 EOF

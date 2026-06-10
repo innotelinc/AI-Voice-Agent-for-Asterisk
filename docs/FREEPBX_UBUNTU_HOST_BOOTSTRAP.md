@@ -72,7 +72,7 @@ sudo scripts/install-freepbx-ubuntu-host.sh --operator-user "$USER"
 sudo scripts/install-freepbx-ubuntu-host.sh --check
 ```
 
-## Optional noninteractive FreePBX AI route provisioning
+## Optional AI route provisioning and verification
 
 If you want the installer to also create/update the PBX-facing route into the AI context, use:
 
@@ -103,6 +103,16 @@ sudo scripts/install-freepbx-ubuntu-host.sh \
 
 Under the hood this calls `scripts/provision-freepbx-ai-route.php`, which uses FreePBX's own bootstrap and installed modules instead of raw guessed SQL.
 
+To verify an existing route without changing state:
+
+```bash
+sudo scripts/install-freepbx-ubuntu-host.sh \
+  --check \
+  --check-ai-route \
+  --ai-route-extension 7000 \
+  --ai-route-target from-ai-agent,s,1
+```
+
 This prints:
 
 - Ubuntu release
@@ -113,6 +123,9 @@ This prints:
 - key module statuses
 - HTTP response headers from `http://127.0.0.1/admin/`
 - Asterisk socket ownership and CLI reachability
+- compiled readback for `7000@app-miscapps`
+- compiled readback for `s@from-ai-agent`
+- a hard failure if the AI target no longer reaches `Stasis(asterisk-ai-voice-agent)`
 
 ## MariaDB root password handling
 

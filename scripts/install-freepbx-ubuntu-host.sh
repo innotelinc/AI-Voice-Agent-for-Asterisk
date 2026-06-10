@@ -19,6 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 PRECHECK_ONLY=false
 PROVISION_AI_ROUTE=false
+CHECK_AI_ROUTE=false
 OPERATOR_USER="${SUDO_USER:-${USER:-root}}"
 FREEPBX_VERSION="${FREEPBX_VERSION:-17.0}"
 FREEPBX_TARBALL_URL="${FREEPBX_TARBALL_URL:-https://mirror.freepbx.org/modules/packages/freepbx/freepbx-17.0-latest.tgz}"
@@ -55,6 +56,7 @@ Bootstrap FreePBX 17 on an Ubuntu host that already runs Asterisk locally.
 
 Options:
   --check                         Verify current host FreePBX/Asterisk state only
+  --check-ai-route                Verify the FreePBX AI route objects plus compiled dialplan readback
   --provision-ai-route            Create/update a FreePBX Custom Destination + Misc Application
   --ai-route-target TARGET        Dialplan target for the route (default: from-ai-agent,s,1)
   --ai-route-extension EXT        Misc Application extension/feature code (default: 7000)
@@ -78,6 +80,10 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --check)
       PRECHECK_ONLY=true
+      shift
+      ;;
+    --check-ai-route)
+      CHECK_AI_ROUTE=true
       shift
       ;;
     --provision-ai-route)
@@ -354,6 +360,35 @@ provision_ai_route() {
   fwconsole reload
 }
 
+verify_ai_route() {
+  info "Verifying FreePBX AI route objects and compiled dialplan"
+  local helper="$REPO_DIR/scripts/provision-freepbx-ai-route.php"
+  [[ -f "$helper" ]] || die "Missing helper: $helper"
+  php "$helper" \
+    --check \
+    --target "$AI_ROUTE_TARGET" \
+    --route-extension "$AI_ROUTE_EXTENSION" \
+    --route-description "$AI_ROUTE_DESCRIPTION" \
+    --custom-dest-description "$AI_CUSTOM_DEST_DESCRIPTION"
+
+  local ai_context ai_exten ai_priority route_out entry_out
+  IFS=',' read -r ai_context ai_exten ai_priority <<< "$AI_ROUTE_TARGET"
+  [[ -n "$ai_context" && -n "$ai_exten" && -n "$ai_priority" ]] || die "Invalid AI route target: $AI_ROUTE_TARGET"
+
+  route_out="$(asterisk -rx "dialplan show ${AI_ROUTE_EXTENSION}@app-miscapps" 2>&1)"
+  entry_out="$(asterisk -rx "dialplan show ${ai_exten}@${ai_context}" 2>&1)"
+
+  echo
+  echo "AI ROUTE DIALPLAN"
+  printf '%s\n' "$route_out" | sed -n '1,80p'
+  echo
+  echo "AI ENTRY DIALPLAN"
+  printf '%s\n' "$entry_out" | sed -n '1,80p'
+
+  grep -q "Goto(customdests,dest-" <<< "$route_out" || die "Misc Application ${AI_ROUTE_EXTENSION} does not route into customdests"
+  grep -q "Stasis(asterisk-ai-voice-agent)" <<< "$entry_out" || die "AI entry target ${ai_exten}@${ai_context} does not reach Stasis(asterisk-ai-voice-agent)"
+}
+
 check_state() {
   echo "OS"
   . /etc/os-release
@@ -395,6 +430,9 @@ main() {
 
   if $PRECHECK_ONLY; then
     check_state
+    if $CHECK_AI_ROUTE; then
+      verify_ai_route
+    fi
     exit 0
   fi
 
@@ -417,6 +455,9 @@ main() {
   fi
   restart_services
   check_state
+  if $PROVISION_AI_ROUTE || $CHECK_AI_ROUTE; then
+    verify_ai_route
+  fi
 
   echo
   success "FreePBX Ubuntu host bootstrap complete"
@@ -424,10 +465,14 @@ main() {
   info "  1. Open http://HOST/admin and complete the first-run admin account wizard if prompted"
   if $PROVISION_AI_ROUTE; then
     info "  2. FreePBX AI route was provisioned at extension ${AI_ROUTE_EXTENSION} -> ${AI_ROUTE_TARGET}"
+    info "  3. The compiled route was also verified from the Asterisk CLI"
+  elif $CHECK_AI_ROUTE; then
+    info "  2. The existing FreePBX AI route was verified at extension ${AI_ROUTE_EXTENSION} -> ${AI_ROUTE_TARGET}"
+    info "  3. Log out/in once if '$OPERATOR_USER' was newly added to the asterisk group"
   else
     info "  2. Create a Custom Destination to from-ai-agent,s,1 and expose it via Misc Applications"
+    info "  3. Log out/in once if '$OPERATOR_USER' was newly added to the asterisk group"
   fi
-  info "  3. Log out/in once if '$OPERATOR_USER' was newly added to the asterisk group"
 }
 
 main "$@"
